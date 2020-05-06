@@ -23,7 +23,7 @@ import org.apache.flink.table.planner.plan.`trait`.MiniBatchIntervalTrait
 import org.apache.calcite.rel.RelNode
 
 /**
-  * A FlinkOptimizeProgram that does some initialization be for MiniBatch Interval inference.
+  * A FlinkOptimizeProgram that does some initialization before MiniBatch Interval inference.
   */
 class FlinkMiniBatchIntervalTraitInitProgram extends FlinkOptimizeProgram[StreamOptimizeContext] {
 

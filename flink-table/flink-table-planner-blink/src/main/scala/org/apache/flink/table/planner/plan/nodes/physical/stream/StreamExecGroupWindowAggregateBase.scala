@@ -36,15 +36,15 @@ import org.apache.flink.table.runtime.operators.window.{CountWindow, TimeWindow,
 import org.apache.flink.table.runtime.types.LogicalTypeDataTypeConverter.fromDataTypeToLogicalType
 import org.apache.flink.table.runtime.typeutils.RowDataTypeInfo
 import org.apache.flink.table.types.logical.LogicalType
-
 import org.apache.calcite.plan.{RelOptCluster, RelTraitSet}
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.core.AggregateCall
 import org.apache.calcite.rel.{RelNode, RelWriter, SingleRel}
 import org.apache.calcite.tools.RelBuilder
-
 import java.time.Duration
 import java.util
+
+import org.apache.flink.table.api.config.ExecutionConfigOptions
 
 import scala.collection.JavaConversions._
 
@@ -154,7 +154,7 @@ abstract class StreamExecGroupWindowAggregateBase(
       needInputCount = needRetraction,
       isStateBackendDataViews = true)
 
-    val aggCodeGenerator = createAggsHandler(
+    val aggCodeGenerated = createAggsHandler(
       aggInfoList,
       config,
       planner.getRelBuilder,
@@ -170,7 +170,7 @@ abstract class StreamExecGroupWindowAggregateBase(
     val accTypes = aggInfoList.getAccTypes.map(fromDataTypeToLogicalType)
     val operator = createWindowOperator(
       config,
-      aggCodeGenerator,
+      aggCodeGenerated,
       equaliser,
       accTypes,
       windowPropertyTypes,
@@ -319,6 +319,11 @@ abstract class StreamExecGroupWindowAggregateBase(
         .produceUpdates()
         .triggering(emitStrategy.getTrigger)
         .withAllowedLateness(Duration.ofMillis(emitStrategy.getAllowLateness))
+    }
+
+    if (config.getConfiguration.getBoolean(ExecutionConfigOptions.TABLE_EXEC_MINIBATCH_ENABLED)) {
+      val bundleTrigger = AggregateUtil.createMiniBatchTrigger(config)
+      newBuilder.withBundleTrigger(bundleTrigger)
     }
 
     aggsHandler match {

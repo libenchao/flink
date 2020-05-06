@@ -34,7 +34,7 @@ import scala.collection.JavaConversions._
   *
   * This rule could handle the following two kinds of operator:
   * 1. supports operators which supports mini-batch and does not require watermark, e.g.
-  * group aggregate. In this case, [[StreamExecMiniBatchAssigner]] with Protime mode will be
+  * group aggregate. In this case, [[StreamExecMiniBatchAssigner]] with Proctime mode will be
   * created if not exist, and the interval value will be set as
   * [[ExecutionConfigOptions.TABLE_EXEC_MINIBATCH_ALLOW_LATENCY]].
   * 2. supports operators which requires watermark, e.g. window join, window aggregate.
@@ -67,10 +67,6 @@ class MiniBatchIntervalInferRule extends RelOptRule(
       ExecutionConfigOptions.TABLE_EXEC_MINIBATCH_ENABLED)
 
     val updatedTrait = rel match {
-      case _: StreamExecGroupWindowAggregate =>
-        // TODO introduce mini-batch window aggregate later
-        MiniBatchIntervalTrait.NO_MINIBATCH
-
       case _: StreamExecWatermarkAssigner => MiniBatchIntervalTrait.NONE
 
       case _: StreamExecMiniBatchAssigner => MiniBatchIntervalTrait.NONE

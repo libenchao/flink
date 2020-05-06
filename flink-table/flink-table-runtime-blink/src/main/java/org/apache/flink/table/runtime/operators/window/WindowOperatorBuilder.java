@@ -20,6 +20,7 @@ package org.apache.flink.table.runtime.operators.window;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.runtime.generated.GeneratedNamespaceAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.GeneratedNamespaceTableAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.GeneratedRecordEqualiser;
@@ -27,6 +28,7 @@ import org.apache.flink.table.runtime.generated.NamespaceAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.NamespaceAggsHandleFunctionBase;
 import org.apache.flink.table.runtime.generated.NamespaceTableAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.RecordEqualiser;
+import org.apache.flink.table.runtime.operators.bundle.trigger.BundleTrigger;
 import org.apache.flink.table.runtime.operators.window.assigners.CountSlidingWindowAssigner;
 import org.apache.flink.table.runtime.operators.window.assigners.CountTumblingWindowAssigner;
 import org.apache.flink.table.runtime.operators.window.assigners.InternalTimeWindowAssigner;
@@ -71,6 +73,8 @@ public class WindowOperatorBuilder {
 	protected long allowedLateness = 0L;
 	protected boolean produceUpdates = false;
 	protected int rowtimeIndex = -1;
+	protected boolean enableMiniBatch = false;
+	protected BundleTrigger<RowData> bundleTrigger;
 
 	public static WindowOperatorBuilder builder() {
 		return new WindowOperatorBuilder();
@@ -161,6 +165,12 @@ public class WindowOperatorBuilder {
 
 	public WindowOperatorBuilder produceUpdates() {
 		this.produceUpdates = true;
+		return this;
+	}
+
+	public WindowOperatorBuilder withBundleTrigger(BundleTrigger<RowData> bundleTrigger) {
+		this.enableMiniBatch = true;
+		this.bundleTrigger = bundleTrigger;
 		return this;
 	}
 
@@ -269,7 +279,9 @@ public class WindowOperatorBuilder {
 					windowOperatorBuilder.windowPropertyTypes,
 					windowOperatorBuilder.rowtimeIndex,
 					windowOperatorBuilder.produceUpdates,
-					windowOperatorBuilder.allowedLateness);
+					windowOperatorBuilder.allowedLateness,
+					windowOperatorBuilder.enableMiniBatch,
+					windowOperatorBuilder.bundleTrigger);
 			} else {
 				//noinspection unchecked
 				return new TableAggregateWindowOperator(
@@ -283,7 +295,9 @@ public class WindowOperatorBuilder {
 					windowOperatorBuilder.windowPropertyTypes,
 					windowOperatorBuilder.rowtimeIndex,
 					windowOperatorBuilder.produceUpdates,
-					windowOperatorBuilder.allowedLateness);
+					windowOperatorBuilder.allowedLateness,
+					windowOperatorBuilder.enableMiniBatch,
+					windowOperatorBuilder.bundleTrigger);
 			}
 		}
 	}
@@ -332,7 +346,9 @@ public class WindowOperatorBuilder {
 					windowOperatorBuilder.windowPropertyTypes,
 					windowOperatorBuilder.rowtimeIndex,
 					windowOperatorBuilder.produceUpdates,
-					windowOperatorBuilder.allowedLateness);
+					windowOperatorBuilder.allowedLateness,
+					windowOperatorBuilder.enableMiniBatch,
+					windowOperatorBuilder.bundleTrigger);
 			} else {
 				//noinspection unchecked
 				return new AggregateWindowOperator(
@@ -347,7 +363,9 @@ public class WindowOperatorBuilder {
 					windowOperatorBuilder.windowPropertyTypes,
 					windowOperatorBuilder.rowtimeIndex,
 					windowOperatorBuilder.produceUpdates,
-					windowOperatorBuilder.allowedLateness);
+					windowOperatorBuilder.allowedLateness,
+					windowOperatorBuilder.enableMiniBatch,
+					windowOperatorBuilder.bundleTrigger);
 			}
 		}
 	}

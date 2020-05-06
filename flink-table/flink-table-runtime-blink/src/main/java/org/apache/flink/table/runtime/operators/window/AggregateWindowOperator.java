@@ -26,6 +26,7 @@ import org.apache.flink.table.runtime.generated.GeneratedNamespaceAggsHandleFunc
 import org.apache.flink.table.runtime.generated.GeneratedRecordEqualiser;
 import org.apache.flink.table.runtime.generated.NamespaceAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.RecordEqualiser;
+import org.apache.flink.table.runtime.operators.bundle.trigger.BundleTrigger;
 import org.apache.flink.table.runtime.operators.window.assigners.WindowAssigner;
 import org.apache.flink.table.runtime.operators.window.triggers.Trigger;
 import org.apache.flink.table.types.logical.LogicalType;
@@ -79,7 +80,9 @@ public class AggregateWindowOperator<K, W extends Window> extends WindowOperator
 			LogicalType[] windowPropertyTypes,
 			int rowtimeIndex,
 			boolean produceUpdates,
-			long allowedLateness) {
+			long allowedLateness,
+			boolean enableMiniBatch,
+			BundleTrigger<RowData> bundleTrigger) {
 		super(windowAggregator,
 			windowAssigner,
 			trigger,
@@ -90,7 +93,9 @@ public class AggregateWindowOperator<K, W extends Window> extends WindowOperator
 			windowPropertyTypes,
 			rowtimeIndex,
 			produceUpdates,
-			allowedLateness);
+			allowedLateness,
+			enableMiniBatch,
+			bundleTrigger);
 		this.aggWindowAggregator = windowAggregator;
 		this.equaliser = checkNotNull(equaliser);
 	}
@@ -107,7 +112,9 @@ public class AggregateWindowOperator<K, W extends Window> extends WindowOperator
 			LogicalType[] windowPropertyTypes,
 			int rowtimeIndex,
 			boolean sendRetraction,
-			long allowedLateness) {
+			long allowedLateness,
+			boolean enableMiniBatch,
+			BundleTrigger<RowData> bundleTrigger) {
 		super(windowAssigner,
 			trigger,
 			windowSerializer,
@@ -117,7 +124,9 @@ public class AggregateWindowOperator<K, W extends Window> extends WindowOperator
 			windowPropertyTypes,
 			rowtimeIndex,
 			sendRetraction,
-			allowedLateness);
+			allowedLateness,
+			enableMiniBatch,
+			bundleTrigger);
 		this.generatedAggWindowAggregator = generatedAggWindowAggregator;
 		this.generatedEqualiser = checkNotNull(generatedEqualiser);
 	}

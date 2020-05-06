@@ -23,6 +23,7 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.runtime.generated.GeneratedNamespaceTableAggsHandleFunction;
 import org.apache.flink.table.runtime.generated.NamespaceTableAggsHandleFunction;
+import org.apache.flink.table.runtime.operators.bundle.trigger.BundleTrigger;
 import org.apache.flink.table.runtime.operators.window.assigners.WindowAssigner;
 import org.apache.flink.table.runtime.operators.window.triggers.Trigger;
 import org.apache.flink.table.types.logical.LogicalType;
@@ -64,7 +65,9 @@ public class TableAggregateWindowOperator<K, W extends Window> extends WindowOpe
 		LogicalType[] windowPropertyTypes,
 		int rowtimeIndex,
 		boolean produceUpdates,
-		long allowedLateness) {
+		long allowedLateness,
+		boolean enableMiniBatch,
+		BundleTrigger<RowData> bundleTrigger) {
 		super(windowTableAggregator,
 			windowAssigner,
 			trigger,
@@ -75,7 +78,9 @@ public class TableAggregateWindowOperator<K, W extends Window> extends WindowOpe
 			windowPropertyTypes,
 			rowtimeIndex,
 			produceUpdates,
-			allowedLateness);
+			allowedLateness,
+			enableMiniBatch,
+			bundleTrigger);
 		this.tableAggWindowAggregator = windowTableAggregator;
 	}
 
@@ -90,7 +95,9 @@ public class TableAggregateWindowOperator<K, W extends Window> extends WindowOpe
 		LogicalType[] windowPropertyTypes,
 		int rowtimeIndex,
 		boolean sendRetraction,
-		long allowedLateness) {
+		long allowedLateness,
+		boolean enableMiniBatch,
+		BundleTrigger<RowData> bundleTrigger) {
 		super(windowAssigner,
 			trigger,
 			windowSerializer,
@@ -100,7 +107,9 @@ public class TableAggregateWindowOperator<K, W extends Window> extends WindowOpe
 			windowPropertyTypes,
 			rowtimeIndex,
 			sendRetraction,
-			allowedLateness);
+			allowedLateness,
+			enableMiniBatch,
+			bundleTrigger);
 		this.generatedTableAggWindowAggregator = generatedTableAggWindowAggregator;
 	}
 
